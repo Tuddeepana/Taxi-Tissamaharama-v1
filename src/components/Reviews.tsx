@@ -9,7 +9,7 @@ export function Reviews() {
     const t = setInterval(() => setI((x) => (x + 1) % REVIEWS.length), 6000);
     return () => clearInterval(t);
   }, [paused]);
-  const r = REVIEWS[i];
+  const r = REVIEWS[i]!;
   return (
     <div className="mx-auto max-w-2xl text-center" onMouseEnter={() => setPaused(true)} onMouseLeave={() => setPaused(false)} onFocus={() => setPaused(true)} onBlur={() => setPaused(false)}>
       <figure key={i} aria-live="polite" className="fade-in min-h-32 rounded-2xl border bg-card p-6 shadow-sm">
