@@ -24,6 +24,12 @@ Continue developing this project in the [Lovable editor](https://lovable.dev/pro
 
 ## Development
 
+See [SEO.md](SEO.md) for the nationwide SEO implementation, deployment checks and remaining Search Console / Google Business Profile work.
+
+Location search and driving distances use Google Places API (New) and Routes API through server functions. Enable both APIs and billing in the Google Cloud project for your key.
+
+For local development, set `GOOGLE_MAPS_API_KEY` in `.env.local` (ignored by Git). For deployment, set the same name in your hosting provider's server secrets. Never prefix it with `VITE_` or put it in `src/config/site.ts`. The local environment file is not deployed with the repository.
+
 Prefer working locally? You need Node.js and npm — [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating).
 
 ```sh

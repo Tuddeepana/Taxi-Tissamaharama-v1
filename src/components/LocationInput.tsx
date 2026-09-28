@@ -85,19 +85,22 @@ export function LocationInput({ label, value, onChange, required, error, placeho
       />
       {loading && <span className="absolute right-3 top-9 text-xs text-muted-foreground">Searching…</span>}
       {open && items.length > 0 && (
-        <ul id={`${id}-list`} role="listbox" className="absolute z-30 mt-1 max-h-64 w-full overflow-auto rounded-lg border bg-popover shadow-lg">
-          {items.map((p, i) => (
-            <li
-              key={`${p.label}-${i}`}
-              role="option"
-              aria-selected={i === active}
-              onMouseDown={(e) => { e.preventDefault(); pick(p); }}
-              className={`cursor-pointer px-3 py-2 text-sm ${i === active ? "bg-accent" : "hover:bg-accent"}`}
-            >
-              {p.label}
-            </li>
-          ))}
-        </ul>
+        <div className="absolute z-30 mt-1 w-full overflow-hidden rounded-lg border bg-popover shadow-lg">
+          <ul id={`${id}-list`} role="listbox" className="max-h-64 overflow-auto">
+            {items.map((p, i) => (
+              <li
+                key={`${p.label}-${i}`}
+                role="option"
+                aria-selected={i === active}
+                onMouseDown={(e) => { e.preventDefault(); pick(p); }}
+                className={`cursor-pointer px-3 py-2 text-sm ${i === active ? "bg-accent" : "hover:bg-accent"}`}
+              >
+                {p.label}
+              </li>
+            ))}
+          </ul>
+          <p translate="no" className="whitespace-nowrap border-t bg-white px-3 py-2 text-xs font-normal not-italic tracking-normal text-[#5e5e5e]">Google Maps</p>
+        </div>
       )}
       {note && !error && <p className="mt-1 text-xs text-muted-foreground">{note}</p>}
       {error && <p id={`${id}-err`} className="field-error">{error}</p>}

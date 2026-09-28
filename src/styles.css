@@ -67,27 +67,27 @@
 
 :root {
   --radius: 0.75rem;
-  --background: oklch(0.99 0.004 85);
-  --foreground: oklch(0.22 0.05 262);
+  --background: oklch(0.985 0.004 90);
+  --foreground: oklch(0.205 0.004 85);
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.22 0.05 262);
+  --card-foreground: oklch(0.205 0.004 85);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.22 0.05 262);
-  --primary: oklch(0.27 0.07 262);
+  --popover-foreground: oklch(0.205 0.004 85);
+  --primary: oklch(0.205 0.004 85);
   --primary-foreground: oklch(0.99 0.004 85);
   --secondary: oklch(0.95 0.01 85);
-  --secondary-foreground: oklch(0.27 0.07 262);
-  --muted: oklch(0.955 0.008 85);
-  --muted-foreground: oklch(0.45 0.03 262);
-  --accent: oklch(0.94 0.02 85);
-  --accent-foreground: oklch(0.27 0.07 262);
-  --gold: oklch(0.78 0.13 80);
+  --secondary-foreground: oklch(0.205 0.004 85);
+  --muted: oklch(0.96 0.006 90);
+  --muted-foreground: oklch(0.46 0.008 85);
+  --accent: oklch(0.965 0.035 90);
+  --accent-foreground: oklch(0.205 0.004 85);
+  --gold: oklch(0.84 0.17 85);
   --whatsapp: oklch(0.52 0.14 150);
   --destructive: oklch(0.577 0.245 27.325);
   --destructive-foreground: oklch(0.984 0.003 247.858);
-  --border: oklch(0.929 0.013 255.508);
-  --input: oklch(0.929 0.013 255.508);
-  --ring: oklch(0.704 0.04 256.788);
+  --border: oklch(0.91 0.009 85);
+  --input: oklch(0.84 0.012 85);
+  --ring: oklch(0.55 0.12 85);
   --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.6 0.118 184.704);
   --chart-3: oklch(0.398 0.07 227.392);
@@ -152,7 +152,7 @@
 @layer base {
   html { scroll-behavior: smooth; }
   body { font-family: var(--font-sans); }
-  :focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
+  :focus-visible { outline: 3px solid var(--ring); outline-offset: 2px; }
   [id] { scroll-margin-top: 5rem; }
   @media (prefers-reduced-motion: reduce) {
     html { scroll-behavior: auto; }
@@ -161,16 +161,30 @@
 }
 @utility font-display { font-family: var(--font-display); }
 @layer components {
-  .field-label { @apply mb-1.5 block text-sm font-medium; }
-  .field { @apply w-full rounded-lg border border-input bg-background px-3 py-2.5 text-base text-foreground outline-none focus:border-primary focus:ring-2 focus:ring-ring/40 aria-[invalid=true]:border-destructive; }
+  .field-label { @apply mb-2 block text-xs font-semibold tracking-wide; }
+  .field { @apply w-full min-h-12 rounded-xl border border-input bg-background px-3.5 py-3 text-base text-foreground outline-none focus:border-primary focus:ring-2 focus:ring-ring/40 aria-[invalid=true]:border-destructive; }
   .field-error { @apply mt-1 text-xs font-medium text-destructive; }
-  .btn-gold { @apply inline-flex items-center justify-center gap-2 rounded-lg bg-gold px-5 py-3 font-semibold text-primary transition hover:brightness-105; }
-  .btn-outline { @apply inline-flex items-center justify-center gap-2 rounded-lg border border-primary-foreground/40 px-5 py-3 font-semibold text-primary-foreground transition hover:bg-primary-foreground/10; }
-  .section { @apply py-16 sm:py-20; }
+  .btn-gold { @apply inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-gold px-6 py-3.5 text-sm font-bold text-primary shadow-sm transition hover:-translate-y-0.5 hover:brightness-105 active:translate-y-0; }
+  .btn-outline { @apply inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-primary-foreground/40 bg-primary-foreground/5 px-6 py-3.5 text-sm font-semibold text-primary-foreground transition hover:bg-primary-foreground/10; }
+  .section { @apply py-16 sm:py-24; }
   .container-x { @apply mx-auto max-w-7xl px-4; }
-  .h2 { @apply font-display text-2xl font-bold sm:text-4xl; }
+  .h2 { @apply font-display text-3xl font-bold tracking-tight sm:text-4xl; }
   .lead { @apply mt-3 max-w-2xl text-muted-foreground; }
-  .card-link { @apply block rounded-2xl border bg-card p-6 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md; }
+  .card-link { @apply flex h-full flex-col rounded-2xl border bg-card p-6 transition duration-200 hover:-translate-y-1 hover:border-gold hover:shadow-lg; }
   .fade-in { animation: fadein .5s ease both; }
 }
 @keyframes fadein { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+@layer components {
+  .brand { @apply inline-flex shrink-0 items-center gap-2.5 text-primary; }
+  .brand-inverse { @apply text-primary-foreground; }
+  .brand-mark { @apply size-14 rounded-xl bg-white object-contain sm:size-16; }
+  .site-header { @apply sticky top-0 z-40 border-b bg-card/95 text-foreground shadow-sm backdrop-blur-xl; }
+  .nav-link { @apply rounded-lg px-2 py-3 text-sm font-semibold text-muted-foreground transition-colors hover:bg-accent hover:text-primary; }
+  .eyebrow { @apply text-[10px] font-bold tracking-[0.2em] text-muted-foreground; }
+  .section-eyebrow { @apply mb-3 text-xs font-bold tracking-[0.18em] text-muted-foreground; }
+  .booking-card { @apply relative min-w-0 rounded-3xl border border-white/40 bg-card p-5 text-card-foreground shadow-2xl sm:p-7; }
+  .service-icon { @apply mb-6 grid size-14 place-items-center rounded-2xl bg-gold/20 text-primary; }
+  .hero-benefit { @apply inline-flex items-center gap-2 text-xs font-medium text-white/85; }
+  .vehicle-card { @apply overflow-hidden rounded-2xl border bg-card transition duration-200 hover:-translate-y-1 hover:shadow-lg; }
+}

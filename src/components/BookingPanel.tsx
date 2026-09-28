@@ -2,7 +2,7 @@ import { useEffect, useState, type ReactNode } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { getRoadDistance, type Place } from "@/lib/routing.functions";
 import { LocationInput } from "./LocationInput";
-import { SITE, VEHICLES, lkr, waLink } from "@/config/site";
+import { SITE, TOUR, UI_COPY, VEHICLES, lkr, waLink } from "@/config/site";
 
 type Tab = "taxi" | "custom" | "tour";
 const TABS: { id: Tab; hash: string; label: string }[] = [
@@ -30,17 +30,17 @@ const Field = ({ id, label, required, error, children }: { id: string; label: st
   </div>
 );
 
-const VehicleSelect = ({ id, value, onChange, error }: { id: string; value: string; onChange: (v: string) => void; error?: string | undefined }) => (
+const VehicleSelect = ({ id, value, onChange, error, tour = false }: { id: string; value: string; onChange: (v: string) => void; error?: string | undefined; tour?: boolean }) => (
   <select id={id} className="field" value={value} onChange={(e) => onChange(e.target.value)} aria-invalid={!!error}>
     <option value="">Select a vehicle</option>
     {VEHICLES.map((v) => (
-      <option key={v.id} value={v.id}>{v.name} — {lkr(v.rate)}/km</option>
+      <option key={v.id} value={v.id}>{v.name} — {tour ? (v.tourDailyRate != null ? `${lkr(v.tourDailyRate)} ${TOUR.rateUnit}` : TOUR.quoteOnRequest) : `${lkr(v.rate)}/km`}</option>
     ))}
   </select>
 );
 
 const Confirm = () => (
-  <p className="pl-12 text-sm text-muted-foreground sm:pl-0">Your booking is confirmed only after our team replies.</p>
+  <p className="text-center text-xs leading-relaxed text-muted-foreground">Your booking is confirmed only after our team replies.</p>
 );
 
 export function BookingPanel() {
@@ -72,11 +72,16 @@ export function BookingPanel() {
   };
 
   return (
-    <div id="booking" className="scroll-mt-24 rounded-2xl border bg-card p-4 text-card-foreground shadow-xl sm:p-6">
+    <div id="booking" className="booking-card scroll-mt-28">
       <span id="book-taxi" className="sr-only" />
       <span id="custom-ride" className="sr-only" />
       <span id="book-tour" className="sr-only" />
-      <div role="tablist" aria-label="Booking options" className="mb-5 grid grid-cols-3 gap-1 rounded-xl bg-muted p-1">
+      <div className="mb-6">
+        <p className="eyebrow">{UI_COPY.bookingEyebrow}</p>
+        <h2 className="mt-2 font-display text-2xl font-bold tracking-tight">{UI_COPY.bookingTitle}</h2>
+        <p className="mt-2 text-sm text-muted-foreground">{UI_COPY.bookingDescription}</p>
+      </div>
+      <div role="tablist" aria-label="Booking options" className="mb-6 grid grid-cols-3 gap-1 rounded-xl bg-muted p-1.5">
         {TABS.map((t, i) => (
           <button
             key={t.id}
@@ -88,8 +93,8 @@ export function BookingPanel() {
             tabIndex={tab === t.id ? 0 : -1}
             onClick={() => setTab(t.id)}
             onKeyDown={(e) => onKey(e, i)}
-            className={`rounded-lg px-2 py-2.5 text-xs font-semibold transition-colors sm:text-sm ${
-              tab === t.id ? "bg-primary text-primary-foreground shadow" : "text-muted-foreground hover:text-foreground"
+            className={`min-h-11 rounded-lg px-2 py-2.5 text-xs font-semibold transition-colors sm:text-sm ${
+              tab === t.id ? "bg-gold text-primary shadow-sm" : "text-muted-foreground hover:bg-card hover:text-foreground"
             }`}
           >
             {t.label}
@@ -207,7 +212,7 @@ function TaxiForm({ min }: { min: string }) {
         {status === "idle" && km == null && <p className="text-muted-foreground">Choose pickup and drop-off from the suggestions to see a road-distance estimate.</p>}
         {status === "idle" && km != null && vehicle && (
           <dl className="grid grid-cols-3 gap-2">
-            <div><dt className="text-xs text-muted-foreground">Road distance</dt><dd className="font-semibold">{km} km</dd></div>
+            <div><dt className="text-xs text-muted-foreground">Road distance</dt><dd className="font-semibold">{km} km <span translate="no" className="inline-block whitespace-nowrap rounded bg-white px-1 text-xs font-normal not-italic tracking-normal text-[#5e5e5e]">Google Maps</span></dd></div>
             <div><dt className="text-xs text-muted-foreground">Rate</dt><dd className="font-semibold">{lkr(vehicle.rate)}/km</dd></div>
             <div><dt className="text-xs text-muted-foreground">Estimated fare</dt><dd className="font-display text-lg font-bold text-primary">{lkr(fare!)}</dd></div>
           </dl>
@@ -269,6 +274,7 @@ function TourForm({ min }: { min: string }) {
   const [f, setF] = useState({ name: "", start: "", end: "", pickup: "", itinerary: "", vehicle: "", travellers: "", extra: "" });
   const [errs, setErrs] = useState<Errs>({});
   const set = (k: keyof typeof f, v: string) => setF((s) => ({ ...s, [k]: v }));
+  const vehicle = VEHICLES.find((v) => v.id === f.vehicle);
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
     const er: Errs = {};
@@ -279,7 +285,7 @@ function TourForm({ min }: { min: string }) {
     else if (f.start && f.end < f.start) er.end = "End date can't be before the start date.";
     if (!f.pickup.trim()) er.pickup = "Please enter a pickup location.";
     if (!f.itinerary.trim()) er.itinerary = "Please list destinations or your itinerary.";
-    if (!f.vehicle) er.vehicle = "Please select a vehicle.";
+    if (!vehicle) er.vehicle = "Please select a vehicle.";
     const n = Number(f.travellers);
     if (!f.travellers || !Number.isInteger(n) || n < 1) er.travellers = "Please enter the number of travellers.";
     setErrs(er);
@@ -292,23 +298,31 @@ function TourForm({ min }: { min: string }) {
       `Pickup: ${f.pickup}`,
       `Travellers: ${f.travellers}`,
       `Vehicle: ${v.name}`,
+      `${TOUR.rateLabel}: ${v.tourDailyRate != null ? `${lkr(v.tourDailyRate)} ${TOUR.rateUnit}` : TOUR.quoteOnRequest}`,
+      TOUR.inclusions,
       `Destinations / itinerary: ${f.itinerary}`,
       f.extra && `Additional requirements: ${f.extra}`,
     ].filter(Boolean).join("\n"));
   };
   return (
     <form onSubmit={submit} noValidate className="grid gap-4">
-      <p className="text-sm text-muted-foreground">Tell us where you'd like to go and our team will reply with a custom tour quote.</p>
+      <p className="text-sm text-muted-foreground">{TOUR.intro}</p>
       <div className="grid gap-4 sm:grid-cols-2">
         <Field id="r-name" label="Guest name" required error={errs.name}><input id="r-name" className="field" value={f.name} onChange={(e) => set("name", e.target.value)} aria-invalid={!!errs.name} /></Field>
-        <Field id="r-pick" label="Pickup location" required error={errs.pickup}><input id="r-pick" className="field" value={f.pickup} onChange={(e) => set("pickup", e.target.value)} aria-invalid={!!errs.pickup} /></Field>
+        <LocationInput label="Pickup location" required value={f.pickup} error={errs.pickup} placeholder="Search for a hotel, airport or town" onChange={(text) => set("pickup", text)} />
         <Field id="r-start" label="Start date" required error={errs.start}><input id="r-start" type="date" min={min} className="field" value={f.start} onChange={(e) => set("start", e.target.value)} aria-invalid={!!errs.start} /></Field>
         <Field id="r-end" label="End date" required error={errs.end}><input id="r-end" type="date" min={f.start || min} className="field" value={f.end} onChange={(e) => set("end", e.target.value)} aria-invalid={!!errs.end} /></Field>
-        <Field id="r-veh" label="Vehicle type" required error={errs.vehicle}><VehicleSelect id="r-veh" value={f.vehicle} onChange={(v) => set("vehicle", v)} error={errs.vehicle} /></Field>
+        <Field id="r-veh" label="Vehicle type" required error={errs.vehicle}><VehicleSelect id="r-veh" tour value={f.vehicle} onChange={(v) => set("vehicle", v)} error={errs.vehicle} /></Field>
         <Field id="r-trav" label="Number of travellers" required error={errs.travellers}><input id="r-trav" type="number" min={1} inputMode="numeric" className="field" value={f.travellers} onChange={(e) => set("travellers", e.target.value)} aria-invalid={!!errs.travellers} /></Field>
       </div>
       <Field id="r-itin" label="Destinations / itinerary" required error={errs.itinerary}><textarea id="r-itin" rows={3} className="field" placeholder="e.g. Yala, Ella, Kandy, Galle" value={f.itinerary} onChange={(e) => set("itinerary", e.target.value)} aria-invalid={!!errs.itinerary} /></Field>
       <Field id="r-extra" label="Additional requirements (optional)"><textarea id="r-extra" rows={2} className="field" value={f.extra} onChange={(e) => set("extra", e.target.value)} /></Field>
+      <div className="rounded-xl border border-gold/30 bg-gold/10 p-4 text-sm">
+        <p aria-live="polite" className="mb-3 font-semibold">{vehicle && `${TOUR.rateLabel}: ${vehicle.tourDailyRate != null ? `${lkr(vehicle.tourDailyRate)} ${TOUR.rateUnit}` : TOUR.quoteOnRequest}`}</p>
+        <h3 className="font-semibold">{TOUR.inclusionsTitle}</h3>
+        <p className="mt-2 text-muted-foreground">{TOUR.inclusions}</p>
+        <p className="mt-2 text-muted-foreground">{TOUR.confirmation}</p>
+      </div>
       <button type="submit" className="btn-gold w-full">Plan My Tour</button>
       <Confirm />
     </form>

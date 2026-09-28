@@ -11,5 +11,5 @@
 
 ## Project rules
 - Business data (rates, WhatsApp number, copy, reviews, site URL) lives in src/config/site.ts — single editable source.
-- Geocoding/routing uses openrouteservice via server functions in src/lib/routing.functions.ts with secret ORS_API_KEY — key never reaches the browser.
+- Geocoding/routing uses Google Places API (New) and Routes API via server functions in src/lib/routing.functions.ts with secret GOOGLE_MAPS_API_KEY — key never reaches the browser.
 - Single landing page at /; sitemap served by src/routes/sitemap[.]xml.ts using SITE.url or request origin.

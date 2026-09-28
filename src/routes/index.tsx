@@ -1,22 +1,24 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
-import { Menu, X, MessageCircle, Phone, MapPin, Plane, Sun, Map, Hotel, Car, Languages, Clock, Headset } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { Menu, X, MessageCircle, Phone, MapPin, Plane, Sun, Map, Hotel, Car, Languages, Clock, Headset, ArrowUpRight, Check } from "lucide-react";
 import hero from "@/assets/hero.jpg";
 import { BookingPanel } from "@/components/BookingPanel";
 import { Reviews } from "@/components/Reviews";
-import { NAV, SITE, VEHICLES, lkr, waLink } from "@/config/site";
+import { Brand } from "@/components/Brand";
+import { NAV, SITE, UI_COPY, VEHICLES, waLink } from "@/config/site";
 import { getRequestOrigin } from "@/lib/routing.functions";
+import { getCanonicalUrl, getStructuredData, serializeStructuredData } from "@/lib/seo";
 
 export const Route = createFileRoute("/")({
   loader: async () => ({ origin: SITE.url || (await getRequestOrigin()) }),
   head: ({ loaderData }) => {
-    const base = loaderData?.origin ?? "";
-    const url = `${base}/`;
-    const img = `${base}/og-image.jpg`;
+    const url = getCanonicalUrl(loaderData?.origin ?? SITE.url);
+    const img = new URL("og-image.jpg", url).href;
     return {
       meta: [
         { title: SITE.title },
         { name: "description", content: SITE.description },
+        { name: "robots", content: "index, follow, max-image-preview:large" },
         { property: "og:title", content: SITE.title },
         { property: "og:description", content: SITE.description },
         { property: "og:type", content: "website" },
@@ -33,18 +35,7 @@ export const Route = createFileRoute("/")({
       scripts: [
         {
           type: "application/ld+json",
-          children: JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": ["LocalBusiness", "TaxiService"],
-            name: SITE.name,
-            description: SITE.description,
-            url,
-            image: img,
-            telephone: SITE.phoneE164,
-            address: { "@type": "PostalAddress", addressLocality: "Tissamaharama", addressCountry: "LK" },
-            areaServed: { "@type": "Country", name: "Sri Lanka" },
-            priceRange: "LKR 130–250 per km",
-          }),
+          children: serializeStructuredData(getStructuredData(url)),
         },
       ],
     };
@@ -68,26 +59,35 @@ const WHY = [
 
 function Header() {
   const [open, setOpen] = useState(false);
+  const toggle = useRef<HTMLButtonElement>(null);
+  useEffect(() => {
+    if (!open) return;
+    const close = (event: KeyboardEvent) => {
+      if (event.key === "Escape") { setOpen(false); toggle.current?.focus(); }
+    };
+    window.addEventListener("keydown", close);
+    return () => window.removeEventListener("keydown", close);
+  }, [open]);
   return (
-    <header className="sticky top-0 z-40 border-b border-primary-foreground/10 bg-primary text-primary-foreground">
-      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4">
-        <a href="#top" className="font-display text-lg font-bold tracking-tight">Taxi <span className="text-gold">Tissamaharama</span></a>
+    <header className="site-header">
+      <div className="mx-auto flex h-20 max-w-7xl items-center justify-between gap-3 px-4">
+        <Brand />
         <nav aria-label="Main" className="hidden lg:block">
-          <ul className="flex gap-5 text-sm">
-            {NAV.map((n) => <li key={n.href}><a href={n.href} className="opacity-85 hover:opacity-100 hover:text-gold">{n.label}</a></li>)}
+          <ul className="flex gap-1 text-sm xl:gap-3">
+            {NAV.map((n) => <li key={n.href}><a href={n.href} className="nav-link">{n.label}</a></li>)}
           </ul>
         </nav>
         <div className="flex items-center gap-2">
           <a href={waLink()} target="_blank" rel="noopener noreferrer" className="btn-gold hidden !py-2 text-sm sm:inline-flex"><MessageCircle className="size-4" aria-hidden /> WhatsApp Us</a>
-          <button type="button" className="rounded-md p-2 lg:hidden" aria-label={open ? "Close menu" : "Open menu"} aria-expanded={open} aria-controls="mobile-nav" onClick={() => setOpen((o) => !o)}>
+          <button ref={toggle} type="button" className="grid size-11 place-items-center rounded-xl border lg:hidden" aria-label={open ? "Close menu" : "Open menu"} aria-expanded={open} aria-controls="mobile-nav" onClick={() => setOpen((o) => !o)}>
             {open ? <X aria-hidden /> : <Menu aria-hidden />}
           </button>
         </div>
       </div>
       {open && (
-        <nav id="mobile-nav" aria-label="Mobile" className="border-t border-primary-foreground/10 lg:hidden">
+        <nav id="mobile-nav" aria-label="Mobile" className="border-t bg-card lg:hidden">
           <ul className="mx-auto grid max-w-7xl gap-1 px-4 py-3">
-            {NAV.map((n) => <li key={n.href}><a href={n.href} onClick={() => setOpen(false)} className="block rounded-md px-2 py-2 hover:bg-primary-foreground/10">{n.label}</a></li>)}
+            {NAV.map((n) => <li key={n.href}><a href={n.href} onClick={() => setOpen(false)} className="block rounded-xl px-3 py-3 text-sm font-semibold hover:bg-accent">{n.label}</a></li>)}
             <li><a href={waLink()} target="_blank" rel="noopener noreferrer" className="btn-gold mt-2 w-full">WhatsApp Us</a></li>
           </ul>
         </nav>
@@ -103,16 +103,20 @@ function Index() {
       <Header />
       <main id="main">
         <section id="top" className="relative overflow-hidden bg-primary text-primary-foreground">
-          <img src={hero} alt="Private taxi driving through tea plantations near Ella, Sri Lanka, at sunset" width={1600} height={1008} fetchPriority="high" className="absolute inset-0 h-full w-full object-cover opacity-40" />
-          <div className="absolute inset-0 bg-gradient-to-b from-primary/70 via-primary/60 to-primary" aria-hidden />
-          <div className="relative mx-auto grid max-w-7xl gap-8 px-4 py-10 lg:grid-cols-[1fr_1.1fr] lg:items-center lg:py-20">
-            <div>
+          <img src={hero} alt="Private taxi driving through tea plantations near Ella, Sri Lanka, at sunset" width={1600} height={1008} fetchPriority="high" className="absolute inset-0 h-full w-full object-cover opacity-50" />
+          <div className="absolute inset-0 bg-gradient-to-r from-primary/95 via-primary/80 to-primary/40" aria-hidden />
+          <div className="relative mx-auto grid max-w-7xl gap-10 px-4 py-10 sm:py-14 lg:grid-cols-[1fr_1.1fr] lg:items-center lg:gap-14 lg:py-16">
+            <div className="min-w-0 lg:py-10">
+              <p className="mb-6 text-xs font-semibold uppercase tracking-[0.15em] text-gold">{UI_COPY.heroEyebrow}</p>
               <p className="mb-3 inline-flex items-center gap-2 rounded-full bg-primary-foreground/10 px-3 py-1 text-xs font-medium"><MapPin className="size-3.5 text-gold" aria-hidden /> Based in Tissamaharama · {SITE.experienceYears} years of experience</p>
-              <h1 className="font-display text-3xl font-bold leading-tight sm:text-5xl">Book a Private Taxi Anywhere in Sri Lanka</h1>
-              <p className="mt-4 max-w-xl text-base opacity-90 sm:text-lg">Airport transfers, hotel pickups, day tours and private journeys with experienced local drivers. Based in Tissamaharama, serving travellers across Sri Lanka.</p>
+              <h1 className="font-display text-4xl font-bold leading-[1.15] tracking-tight sm:text-5xl xl:text-[3.25rem]">{UI_COPY.heroHeading} <span className="block text-gold">{UI_COPY.heroHighlight}</span></h1>
+              <p className="mt-6 max-w-lg text-base leading-relaxed text-white/80 sm:text-lg">{UI_COPY.heroDescription}</p>
               <div className="mt-6 flex flex-wrap gap-3">
-                <a href="#book-taxi" className="btn-gold">Book Your Ride</a>
+                <a href="#book-taxi" className="btn-gold">Book Your Ride <ArrowUpRight className="size-4" aria-hidden /></a>
                 <a href={waLink()} target="_blank" rel="noopener noreferrer" className="btn-outline"><MessageCircle className="size-4" aria-hidden /> Chat on WhatsApp</a>
+              </div>
+              <div className="mt-8 flex flex-wrap gap-x-5 gap-y-3 border-t border-white/15 pt-6">
+                {UI_COPY.heroBenefits.map((benefit) => <span key={benefit} className="hero-benefit"><Check className="size-4 text-gold" aria-hidden />{benefit}</span>)}
               </div>
             </div>
             <BookingPanel />
@@ -121,15 +125,16 @@ function Index() {
 
         <section id="services" className="section">
           <div className="container-x">
+            <p className="section-eyebrow">{UI_COPY.servicesEyebrow}</p>
             <h2 className="h2">Our Services</h2>
             <p className="lead">Private transport for every part of your Sri Lanka trip — wherever on the island you're heading.</p>
             <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
               {SERVICES.map((s) => (
                 <a key={s.title} href={s.href} className="card-link group">
-                  <s.icon className="size-8 text-gold" aria-hidden />
-                  <h3 className="mt-4 font-display text-lg font-semibold">{s.title}</h3>
-                  <p className="mt-2 text-sm text-muted-foreground">{s.text}</p>
-                  <span className="mt-4 inline-block text-sm font-semibold text-primary group-hover:underline">Book now →</span>
+                  <span className="service-icon"><s.icon className="size-6" aria-hidden /></span>
+                  <h3 className="font-display text-lg font-semibold">{s.title}</h3>
+                  <p className="mt-3 flex-1 text-sm leading-relaxed text-muted-foreground">{s.text}</p>
+                  <span className="mt-6 inline-flex items-center gap-2 text-sm font-bold text-primary">Book now <ArrowUpRight className="size-4 transition-transform group-hover:translate-x-1" aria-hidden /></span>
                 </a>
               ))}
             </div>
@@ -138,15 +143,15 @@ function Index() {
 
         <section id="vehicles" className="section bg-muted/50">
           <div className="container-x">
+            <p className="section-eyebrow">{UI_COPY.vehiclesEyebrow}</p>
             <h2 className="h2">Our Vehicles</h2>
-            <p className="lead">Choose the vehicle that suits your journey. Rates are per kilometre of road distance.</p>
+            <p className="lead">Choose the vehicle that suits your journey.</p>
             <ul className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-5">
               {VEHICLES.map((v) => (
-                <li key={v.id} className="overflow-hidden rounded-2xl border bg-card shadow-sm">
+                <li key={v.id} className="vehicle-card">
                   <img src={v.image} alt={v.alt} width={976} height={688} loading="lazy" decoding="async" className="aspect-[4/3] w-full object-cover" />
-                  <div className="p-4">
+                  <div className="border-t-2 border-gold p-5">
                     <h3 className="font-display text-lg font-semibold">{v.name}</h3>
-                    <p className="mt-1 text-sm"><span className="font-bold text-primary">{lkr(v.rate)}</span> <span className="text-muted-foreground">per km</span></p>
                   </div>
                 </li>
               ))}
@@ -157,6 +162,7 @@ function Index() {
         <section id="about" className="section">
           <div className="container-x grid gap-10 lg:grid-cols-2">
             <div>
+              <p className="section-eyebrow">{UI_COPY.aboutEyebrow}</p>
               <h2 className="h2">About Taxi Tissamaharama</h2>
               <div className="mt-4 space-y-4 text-muted-foreground">
                 <p>For {SITE.experienceYears} years, Taxi Tissamaharama has been helping visitors travel around Sri Lanka comfortably and without fuss. We're based in Tissamaharama, in the island's deep south, and we arrange private airport transfers, hotel transfers, local journeys and tours across the whole country.</p>
@@ -168,7 +174,7 @@ function Index() {
               <div className="mt-6 grid gap-4 sm:grid-cols-2">
                 {WHY.map((w) => (
                   <div key={w.title} className="rounded-2xl border bg-card p-5">
-                    <w.icon className="size-6 text-gold" aria-hidden />
+                    <span className="inline-flex rounded-xl bg-gold/20 p-3"><w.icon className="size-5 text-primary" aria-hidden /></span>
                     <h3 className="mt-3 font-semibold">{w.title}</h3>
                     <p className="mt-1 text-sm text-muted-foreground">{w.text}</p>
                   </div>
@@ -180,6 +186,7 @@ function Index() {
 
         <section id="reviews" className="section bg-muted/50">
           <div className="container-x">
+            <p className="section-eyebrow text-center">{UI_COPY.reviewsEyebrow}</p>
             <h2 className="h2 text-center">Guest Reviews</h2>
             <p className="lead mx-auto text-center">What travellers say about riding with us.</p>
             <div className="mt-8"><Reviews /></div>
@@ -200,14 +207,14 @@ function Index() {
       </main>
 
       <footer className="border-t border-primary-foreground/10 bg-primary pb-24 pt-8 text-primary-foreground sm:pb-8">
-        <div className="container-x flex flex-col gap-4 pl-20 text-sm sm:pl-4 sm:flex-row sm:items-center sm:justify-between">
-          <p className="font-display font-bold">Taxi <span className="text-gold">Tissamaharama</span></p>
+        <div className="container-x flex flex-col gap-6 text-sm lg:flex-row lg:items-center lg:justify-between">
+          <Brand inverse />
           <nav aria-label="Footer"><ul className="flex flex-wrap gap-x-4 gap-y-2 opacity-85">{NAV.map((n) => <li key={n.href}><a href={n.href} className="hover:text-gold">{n.label}</a></li>)}</ul></nav>
           <p className="opacity-70">© {SITE.name}. All rights reserved.</p>
         </div>
       </footer>
 
-      <a href={waLink()} target="_blank" rel="noopener noreferrer" aria-label="Chat with Taxi Tissamaharama on WhatsApp" className="fixed bottom-4 left-4 z-40 grid size-12 place-items-center rounded-full bg-whatsapp text-primary-foreground shadow-lg transition-transform hover:scale-105">
+      <a href={waLink()} target="_blank" rel="noopener noreferrer" aria-label="Chat with Taxi Tissamaharama on WhatsApp" className="fixed bottom-4 right-4 z-40 hidden size-12 place-items-center rounded-full border-2 border-white bg-whatsapp text-primary-foreground shadow-lg transition-transform hover:scale-105 lg:grid">
         <MessageCircle className="size-6" aria-hidden />
       </a>
     </>
