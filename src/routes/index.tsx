@@ -200,7 +200,7 @@ function Index() {
       </main>
 
       <footer className="border-t border-primary-foreground/10 bg-primary pb-24 pt-8 text-primary-foreground sm:pb-8">
-        <div className="container-x flex flex-col gap-4 text-sm sm:flex-row sm:items-center sm:justify-between">
+        <div className="container-x flex flex-col gap-4 pl-20 text-sm sm:pl-4 sm:flex-row sm:items-center sm:justify-between">
           <p className="font-display font-bold">Taxi <span className="text-gold">Tissamaharama</span></p>
           <nav aria-label="Footer"><ul className="flex flex-wrap gap-x-4 gap-y-2 opacity-85">{NAV.map((n) => <li key={n.href}><a href={n.href} className="hover:text-gold">{n.label}</a></li>)}</ul></nav>
           <p className="opacity-70">© {SITE.name}. All rights reserved.</p>

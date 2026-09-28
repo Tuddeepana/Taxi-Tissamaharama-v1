@@ -40,7 +40,7 @@ const VehicleSelect = ({ id, value, onChange, error }: { id: string; value: stri
 );
 
 const Confirm = () => (
-  <p className="text-sm text-muted-foreground">Your booking is confirmed only after our team replies.</p>
+  <p className="pl-12 text-sm text-muted-foreground sm:pl-0">Your booking is confirmed only after our team replies.</p>
 );
 
 export function BookingPanel() {
