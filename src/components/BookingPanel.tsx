@@ -20,7 +20,7 @@ function openWhatsApp(text: string) {
   window.open(waLink(text), "_blank", "noopener,noreferrer");
 }
 
-const Field = ({ id, label, required, error, children }: { id: string; label: string; required?: boolean; error?: string; children: ReactNode }) => (
+const Field = ({ id, label, required, error, children }: { id: string; label: string; required?: boolean; error?: string | undefined; children: ReactNode }) => (
   <div>
     <label htmlFor={id} className="field-label">
       {label} {required && <span aria-hidden className="text-gold">*</span>}
@@ -30,7 +30,7 @@ const Field = ({ id, label, required, error, children }: { id: string; label: st
   </div>
 );
 
-const VehicleSelect = ({ id, value, onChange, error }: { id: string; value: string; onChange: (v: string) => void; error?: string }) => (
+const VehicleSelect = ({ id, value, onChange, error }: { id: string; value: string; onChange: (v: string) => void; error?: string | undefined }) => (
   <select id={id} className="field" value={value} onChange={(e) => onChange(e.target.value)} aria-invalid={!!error}>
     <option value="">Select a vehicle</option>
     {VEHICLES.map((v) => (
@@ -67,8 +67,8 @@ export function BookingPanel() {
     else if (e.key === "ArrowLeft") n = (i - 1 + TABS.length) % TABS.length;
     else return;
     e.preventDefault();
-    setTab(TABS[n].id);
-    document.getElementById(`tab-${TABS[n].id}`)?.focus();
+    setTab(TABS[n]!.id);
+    document.getElementById(`tab-${TABS[n]!.id}`)?.focus();
   };
 
   return (
@@ -105,7 +105,7 @@ export function BookingPanel() {
   );
 }
 
-type Errs = Record<string, string>;
+type Errs = Partial<Record<"pickup"|"drop"|"date"|"time"|"vehicle"|"name"|"dest"|"desc"|"start"|"end"|"itinerary"|"travellers", string>>;
 
 function TaxiForm({ min }: { min: string }) {
   const route = useServerFn(getRoadDistance);
