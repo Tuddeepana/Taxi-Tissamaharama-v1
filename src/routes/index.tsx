@@ -5,6 +5,7 @@ import hero from "@/assets/hero.jpg";
 import { BookingPanel } from "@/components/BookingPanel";
 import { Reviews } from "@/components/Reviews";
 import { Brand } from "@/components/Brand";
+import { Gallery } from "@/components/Gallery";
 import { NAV, SITE, UI_COPY, VEHICLES, waLink } from "@/config/site";
 import { getRequestOrigin } from "@/lib/routing.functions";
 import { getCanonicalUrl, getStructuredData, serializeStructuredData } from "@/lib/seo";
@@ -160,20 +161,54 @@ function Index() {
         </section>
 
         <section id="about" className="section">
-          <div className="container-x grid gap-10 lg:grid-cols-2">
+          <div className="container-x grid gap-12 lg:grid-cols-2 lg:items-center">
             <div>
               <p className="section-eyebrow">{UI_COPY.aboutEyebrow}</p>
               <h2 className="h2">About Taxi Tissamaharama</h2>
               <div className="mt-4 space-y-4 text-muted-foreground">
-                <p>For {SITE.experienceYears} years, Taxi Tissamaharama has been helping visitors travel around Sri Lanka comfortably and without fuss. We're based in Tissamaharama, in the island's deep south, and we arrange private airport transfers, hotel transfers, local journeys and tours across the whole country.</p>
+                <p>For {SITE.experienceYears} years, Taxi Tissamaharama has been helping visitors travel around Sri Lanka comfortably and without fuss. We're based in Tissamaharama, in the island's deep south, and we arrange private airport transfers, hotel transfers, local journeys, and tours across the whole country.</p>
                 <p>We keep things simple: you tell us where you want to go, we reply with clear details, and you travel with a local driver in a private vehicle. No complicated booking platforms — just direct, friendly communication on WhatsApp or by phone.</p>
               </div>
+
+              {/* Founder Spotlight Card */}
+              <div className="mt-8 overflow-hidden rounded-3xl border border-gold/30 bg-card p-6 shadow-sm sm:p-7">
+                <div className="flex flex-col gap-5 sm:flex-row sm:items-center">
+                  <div className="relative shrink-0">
+                    <img
+                      src={SITE.founder.image}
+                      alt={SITE.founder.alt}
+                      width={120}
+                      height={120}
+                      loading="lazy"
+                      decoding="async"
+                      className="size-24 rounded-2xl border-2 border-gold object-cover shadow-md sm:size-28"
+                    />
+                    <span className="absolute -bottom-2 -right-2 rounded-full bg-gold px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-primary shadow">
+                      Founder
+                    </span>
+                  </div>
+                  <div>
+                    <h3 className="font-display text-xl font-bold text-foreground">{SITE.founder.name}</h3>
+                    <p className="text-sm font-medium text-gold">{SITE.founder.role}</p>
+                    <p className="mt-1 text-xs text-muted-foreground">Based in Tissamaharama · {SITE.experienceYears}+ Years Serving Global Travelers</p>
+                  </div>
+                </div>
+
+                <div className="mt-5 border-t border-border pt-4">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">A Message from Our Founder</p>
+                  <blockquote className="mt-2 text-sm leading-relaxed text-muted-foreground italic">
+                    "{SITE.founder.message}"
+                  </blockquote>
+                </div>
+              </div>
             </div>
+
             <div>
               <h2 className="h2">Why Choose Us</h2>
+              <p className="mt-2 text-sm text-muted-foreground">Reliable service trusted by travelers from all around the world.</p>
               <div className="mt-6 grid gap-4 sm:grid-cols-2">
                 {WHY.map((w) => (
-                  <div key={w.title} className="rounded-2xl border bg-card p-5">
+                  <div key={w.title} className="rounded-2xl border bg-card p-5 transition duration-200 hover:-translate-y-1 hover:border-gold hover:shadow-md">
                     <span className="inline-flex rounded-xl bg-gold/20 p-3"><w.icon className="size-5 text-primary" aria-hidden /></span>
                     <h3 className="mt-3 font-semibold">{w.title}</h3>
                     <p className="mt-1 text-sm text-muted-foreground">{w.text}</p>
@@ -181,6 +216,15 @@ function Index() {
                 ))}
               </div>
             </div>
+          </div>
+        </section>
+
+        <section id="gallery" className="section">
+          <div className="container-x">
+            <p className="section-eyebrow text-center">{UI_COPY.galleryEyebrow}</p>
+            <h2 className="h2 text-center">Our Journeys in Pictures</h2>
+            <p className="lead mx-auto text-center">Real photos from real trips — see what travelling with Taxi Tissamaharama looks like across Sri Lanka.</p>
+            <Gallery />
           </div>
         </section>
 

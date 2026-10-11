@@ -187,4 +187,5 @@
   .service-icon { @apply mb-6 grid size-14 place-items-center rounded-2xl bg-gold/20 text-primary; }
   .hero-benefit { @apply inline-flex items-center gap-2 text-xs font-medium text-white/85; }
   .vehicle-card { @apply overflow-hidden rounded-2xl border bg-card transition duration-200 hover:-translate-y-1 hover:shadow-lg; }
+  .gallery-thumb { @apply block w-full cursor-pointer border-2 border-transparent transition duration-200 hover:-translate-y-1 hover:border-gold hover:shadow-xl; }
 }

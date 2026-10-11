@@ -29,6 +29,12 @@ export function getStructuredData(url: string) {
           addressCountry: SITE.countryCode,
         },
         areaServed,
+        founder: {
+          "@type": "Person",
+          name: SITE.founder.name,
+          jobTitle: SITE.founder.role,
+          image: new URL(SITE.founder.image, url).href,
+        },
       },
       {
         "@type": "WebSite",
